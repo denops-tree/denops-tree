@@ -25,10 +25,6 @@ class File {
 
 type FileNode = Node<File>;
 
-function displayNode<T extends Display>(node: Node<T>) {
-  node.body.display();
-}
-
 type TreeOption = {
   verticalRule: string; // │
   continuousRule: string; // ├──
