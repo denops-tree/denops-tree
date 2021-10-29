@@ -32,7 +32,6 @@ function displayNode<T extends Display>(node: Node<T>) {
 type TreeOption = {
   verticalRule: string; // │
   continuousRule: string; // ├──
-  lastRule: string; // └──
 };
 
 class Tree<T extends Display> {
@@ -45,51 +44,30 @@ class Tree<T extends Display> {
   }
 
   display(maxWidth?: number): string {
-    return this.draw(this.root, []);
+    return this.draw(this.root, 0);
   }
 
-  draw(node: Node<T>, indentKindStack: ("last" | "continuous")[]): string {
+  draw(node: Node<T>, indent: number): string {
     const v = [];
 
-    let indent = "";
-    for (const [idx, kind] of indentKindStack.entries()) {
-      if (idx == indentKindStack.length - 1) {
-        if (kind == "last") {
-          indent += this.option.lastRule;
-        } else {
-          indent += this.option.continuousRule;
-        }
-      } else {
-        if (kind == "last") {
-          indent += "   ";
-        } else {
-          indent += this.option.verticalRule;
-        }
-      }
+    if (indent == 0) {
+      v.push(node.body.display());
+    } else {
+      const strIndent = this.option.verticalRule.repeat(indent - 1) +
+        this.option.continuousRule;
+      v.push(strIndent + node.body.display());
     }
 
-    v.push(indent + node.body.display());
-    for (const [idx, child] of node.children.entries()) {
-      if (idx == node.children.length - 1) {
-        // 最後の罫線を用いる
-        const stack = [...indentKindStack, "last"] as ("last" | "continuous")[];
-        v.push(this.draw(child, stack));
-      } else {
-        const stack = [
-          ...indentKindStack,
-          "continuous",
-        ] as ("last" | "continuous")[];
-        v.push(this.draw(child, stack));
-      }
+    for (const child of node.children) {
+      v.push(this.draw(child, indent + 1));
     }
     return v.join("\n");
   }
 }
 
 const option = {
-  verticalRule: "│  ",
-  continuousRule: "├──",
-  lastRule: "└──",
+  verticalRule: "| ",
+  continuousRule: "+ ",
 };
 
 const root: FileNode = {
